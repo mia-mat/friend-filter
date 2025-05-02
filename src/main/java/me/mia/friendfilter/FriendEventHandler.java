@@ -10,13 +10,14 @@ public class FriendEventHandler {
 
     @SubscribeEvent
     public void onChatReceived(ClientChatReceivedEvent e) {
+        if(!FriendFilter.isOnHypixel()) return;
+
         // unformatted message doesn't give colour codes
         final String message = e.message.getUnformattedText();
 
         if (!(message.startsWith("Friend > ")
         || (FriendFilter.CONFIG.isConsideringGuild() && message.startsWith("Guild > ")))) return;
-
-        // Unexpected, but don't deal with invalid messages nonetheless
+        
         if (!(message.endsWith(" left.") || message.endsWith(" joined."))) return;
 
         final String[] messageComponents = message.split(" ");
