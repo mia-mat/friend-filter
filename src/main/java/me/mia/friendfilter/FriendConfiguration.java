@@ -15,11 +15,13 @@ public class FriendConfiguration implements Serializable {
 
 
     private boolean defaultShow; // whether join messages are shown by default
+    private boolean consideringGuild;
 
     private Set<String> usernames;
 
     private FriendConfiguration() {
         this.defaultShow = true; // default behaviour is to show all friends unless otherwise specified
+        this.consideringGuild = true;
         this.usernames = new HashSet<String>();
 
     }
@@ -52,6 +54,15 @@ public class FriendConfiguration implements Serializable {
     public void setDefaultShow(final boolean value) {
         this.defaultShow = value;
         save();
+    }
+
+    public void setConsideringGuild(final boolean value) {
+        this.consideringGuild = value;
+        save();
+    }
+
+    public boolean isConsideringGuild() {
+        return consideringGuild;
     }
 
     public boolean shouldShowMessage(final String name) {

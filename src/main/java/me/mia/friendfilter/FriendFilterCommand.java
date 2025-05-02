@@ -47,11 +47,17 @@ public class FriendFilterCommand extends CommandBase {
             return;
         }
 
-        if(args[0].equalsIgnoreCase("switch")) {
+        if(args[0].equalsIgnoreCase("switch") || args[0].equalsIgnoreCase("toggle")) {
             config.setDefaultShow(!config.isDefaultShow());
             sendMessage("Set default behaviour to " +
                     ((config.isDefaultShow()) ? ChatFormatting.GREEN + "show" : ChatFormatting.RED + "hide") +
                     ChatFormatting.WHITE + " join and leave messages.");
+            return;
+        }
+
+        if(args[0].equalsIgnoreCase("guild")) {
+            config.setConsideringGuild(!config.isConsideringGuild());
+            sendMessage((config.isConsideringGuild() ? "Now" : "No longer") + " considering guild messages.");
             return;
         }
 
@@ -68,7 +74,7 @@ public class FriendFilterCommand extends CommandBase {
 
             StringBuilder message = new StringBuilder("Your filter list: \n");
 
-            for (String username : config.getList()) {
+            for (String username : sortedUsernames) {
                 message.append(ChatFormatting.LIGHT_PURPLE)
                         .append(" - ")
                         .append(ChatFormatting.GRAY)
@@ -126,6 +132,7 @@ public class FriendFilterCommand extends CommandBase {
         // help
         sendMessage("/ff"  + ChatFormatting.GRAY + " - shows the default behaviour");
         sendMessage("/ff switch " + ChatFormatting.GRAY + "- toggles whether messages are shown or hidden by default");
+        sendMessage("/ff guild " + ChatFormatting.GRAY + "- toggles listening for players in your guild");
         sendMessage("/ff list " + ChatFormatting.GRAY + "- view your filter list");
         sendMessage("/ff add <username> " + ChatFormatting.GRAY + "- adds a username to your filter list (to do the opposite of the default behaviour)");
         sendMessage("/ff remove <username> " + ChatFormatting.GRAY + "- removes a username from your filter list");

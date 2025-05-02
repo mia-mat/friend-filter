@@ -13,7 +13,8 @@ public class FriendEventHandler {
         // unformatted message doesn't give colour codes
         final String message = e.message.getUnformattedText();
 
-        if (!message.startsWith("Friend > ")) return;
+        if (!(message.startsWith("Friend > ")
+        || (FriendFilter.CONFIG.isConsideringGuild() && message.startsWith("Guild > ")))) return;
 
         // Unexpected, but don't deal with invalid messages nonetheless
         if (!(message.endsWith(" left.") || message.endsWith(" joined."))) return;
@@ -41,7 +42,7 @@ public class FriendEventHandler {
             return;
         }
 
-        String ip = Minecraft.getMinecraft().getCurrentServerData().serverIP;
+        final String ip = Minecraft.getMinecraft().getCurrentServerData().serverIP;
         if(ip.split("\\.").length == 2) {
             FriendFilter.setOnHypixel(ip.equalsIgnoreCase("hypixel.net"));
         } else {
