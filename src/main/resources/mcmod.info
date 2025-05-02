@@ -1,0 +1,15 @@
+[
+{
+  "modid": "friend-filter",
+  "name": "Friend Filter",
+  "description": "Hypixel utility",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["gh/mia-mat"],
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
