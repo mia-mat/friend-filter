@@ -19,6 +19,7 @@ public class FriendConfiguration implements Serializable {
         this.consideringGuild = true;
         this.usernames = new HashSet<>();
 
+        save();
     }
 
     public boolean addUsername(final String name) {
