@@ -1,6 +1,6 @@
 [
 {
-  "modid": "friend-filter",
+  "modid": "friendfilter",
   "name": "Friend Filter",
   "description": "Hypixel utility",
   "version": "${version}",
