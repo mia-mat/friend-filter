@@ -1,4 +1,4 @@
-package me.mia.friendfilter;
+package ws.miaw.friendfilter;
 
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -6,7 +6,9 @@ import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentText;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class FriendFilterCommand extends CommandBase {
     @Override
@@ -21,9 +23,7 @@ public class FriendFilterCommand extends CommandBase {
 
     @Override
     public List<String> getCommandAliases() {
-        return new ArrayList<String>() {{
-            add("ff");
-        }};
+        return Collections.singletonList("ff");
     }
 
     @Override
@@ -33,21 +33,25 @@ public class FriendFilterCommand extends CommandBase {
 
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
-        if(!FriendFilter.isOnHypixel()) {
+        if (!ServerUtil.isOnHypixel()) {
+            sendErrorMessage("You must be connected to Hypixel to execute that command.");
             return;
         }
 
-        FriendConfiguration config = FriendFilter.CONFIG;
+        FriendConfiguration config = FriendFilterMod.getConfig();
 
-        if(args.length < 1) {
+        if (args.length < 1) {
             sendMessage("Current default behaviour is to " +
                     ((config.isDefaultShow()) ? ChatFormatting.GREEN + "show" : ChatFormatting.RED + "hide") +
-                    ChatFormatting.WHITE + " join and leave messages. " +
-                    ChatFormatting.GRAY + "Use '/ff help' for more information.");
+                    ChatFormatting.WHITE + " join/leave messages and " +
+                    (config.isConsideringGuild() ? ChatFormatting.GREEN + "consider" : ChatFormatting.RED + "not consider") + " guild messages"
+            );
+
+            sendMessage(ChatFormatting.GRAY + "Use '/ff help' for more information.");
             return;
         }
 
-        if(args[0].equalsIgnoreCase("switch") || args[0].equalsIgnoreCase("toggle")) {
+        if (args[0].equalsIgnoreCase("switch") || args[0].equalsIgnoreCase("toggle")) {
             config.setDefaultShow(!config.isDefaultShow());
             sendMessage("Set default behaviour to " +
                     ((config.isDefaultShow()) ? ChatFormatting.GREEN + "show" : ChatFormatting.RED + "hide") +
@@ -55,47 +59,43 @@ public class FriendFilterCommand extends CommandBase {
             return;
         }
 
-        if(args[0].equalsIgnoreCase("guild")) {
+        if (args[0].equalsIgnoreCase("guild")) {
             config.setConsideringGuild(!config.isConsideringGuild());
-            sendMessage((config.isConsideringGuild() ? "Now" : "No longer") + " considering guild messages.");
+            sendMessage((config.isConsideringGuild() ? ChatFormatting.GREEN + "Now" : ChatFormatting.RED + "No longer") +
+                    " considering guild messages.");
             return;
         }
 
-        if(args[0].equalsIgnoreCase("list")) {
-            if(config.getList().isEmpty()) {
+        if (args[0].equalsIgnoreCase("list")) {
+            if (config.getList().isEmpty()) {
                 sendMessage("There are currently no players on the filter list. Use /ff add <username> to add some.");
                 return;
             }
 
-            // to sort alphabetically
-            List<String> sortedUsernames = new ArrayList<String>();
-            sortedUsernames.addAll(config.getList());
-            Collections.sort(sortedUsernames);
-
             StringBuilder message = new StringBuilder("Your filter list: \n");
-
-            for (String username : sortedUsernames) {
+            config.getList().stream().sorted(Comparator.naturalOrder()).forEachOrdered(username -> {
                 message.append(ChatFormatting.LIGHT_PURPLE)
                         .append(" - ")
                         .append(ChatFormatting.GRAY)
                         .append(username).append("\n");
-            }
+            });
+
             sendMessage(message.toString().trim());
             return;
         }
 
-        if(args[0].equalsIgnoreCase("add")) {
-            if(args.length < 2) {
+        if (args[0].equalsIgnoreCase("add")) {
+            if (args.length < 2) {
                 sendErrorMessage("Usage: /ff add <username>");
                 return;
             }
 
-            if(!args[1].matches("^\\w{3,16}$")) {
+            if (!args[1].matches("^\\w{1,16}$")) { // username regex (some OG names are <3 chars so min. 1)
                 sendErrorMessage("Invalid username.");
                 return;
             }
 
-            if(config.addUsername(args[1].toLowerCase())) {
+            if (config.addUsername(args[1].toLowerCase())) {
                 sendMessage("Added " +
                         ChatFormatting.LIGHT_PURPLE + args[1].toLowerCase() +
                         ChatFormatting.WHITE + " to your filter list.");
@@ -106,13 +106,13 @@ public class FriendFilterCommand extends CommandBase {
             return;
         }
 
-        if(args[0].equalsIgnoreCase("remove")) {
-            if(args.length < 2) {
+        if (args[0].equalsIgnoreCase("remove")) {
+            if (args.length < 2) {
                 sendErrorMessage("Usage: /ff remove <username>");
                 return;
             }
 
-            if(config.removeUsername(args[1].toLowerCase())) {
+            if (config.removeUsername(args[1].toLowerCase())) {
                 sendMessage("Removed " +
                         ChatFormatting.LIGHT_PURPLE + args[1].toLowerCase() +
                         ChatFormatting.WHITE + " from your filter list.");
@@ -123,14 +123,14 @@ public class FriendFilterCommand extends CommandBase {
             return;
         }
 
-        if(args[0].equalsIgnoreCase("clear")) {
+        if (args[0].equalsIgnoreCase("clear")) {
             config.clear();
             sendMessage("Cleared your filter list.");
             return;
         }
 
         // help
-        sendMessage("/ff"  + ChatFormatting.GRAY + " - shows the default behaviour");
+        sendMessage("/ff" + ChatFormatting.GRAY + " - shows default behaviours");
         sendMessage("/ff switch " + ChatFormatting.GRAY + "- toggles whether messages are shown or hidden by default");
         sendMessage("/ff guild " + ChatFormatting.GRAY + "- toggles listening for players in your guild");
         sendMessage("/ff list " + ChatFormatting.GRAY + "- view your filter list");
@@ -148,7 +148,6 @@ public class FriendFilterCommand extends CommandBase {
     private void sendErrorMessage(final String msg) {
         sendMessage(ChatFormatting.RED + msg);
     }
-
 
 
 }
